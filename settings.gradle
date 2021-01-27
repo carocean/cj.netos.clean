@@ -1,0 +1,2 @@
+include "cj.netos.clean.start"
+include "cj.netos.clean.console"

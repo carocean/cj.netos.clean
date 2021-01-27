@@ -1,0 +1,61 @@
+apply plugin:'application'
+mainClassName = "cj.netos.clean.start.Main"
+sourceSets { 
+	 main { 
+	 	java{
+	 		srcDir "$projectDir/src"
+	 	}
+	 	resources{
+		 	srcDir "$projectDir/src"
+		 }
+	 } 
+ 	}
+ 		sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+ 	tasks.withType(JavaCompile) {  
+        options.encoding = "UTF-8"  
+    } 
+ repositories { 
+ 	mavenCentral();
+ }
+ jar {
+    manifest {
+        attributes 'Manifest-Version': version,
+                   'Class-Path': '.',
+                   'Main-Class':'cj.netos.clean.start.Main',
+                   'DynamicImport-Package':'*'
+    }
+}
+
+dependencies {
+	compile(
+            'commons-cli:commons-cli:1.2'
+    )
+    // https://mvnrepository.com/artifact/log4j/log4j
+    compile group: 'log4j', name: 'log4j', version: '1.2.17'
+    testCompile(
+        'junit:junit:4.11'
+    )
+	compile fileTree(dir: 'libs', includes: ['*.jar'])
+    runtime fileTree(dir: 'libs', includes: ['*.jar'])
+}
+task runnableJar(dependsOn:':cj.netos.clean.console:release',type: Jar) {
+	manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',  
+        	'Implementation-Version': version,
+        	'Main-Class': 'cj.netos.clean.start.Main'
+    }
+    baseName = 'clean'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+    task release(dependsOn: runnableJar,type: Copy) {
+     dependsOn "build"
+     from 'build/libs/'
+     into '../cmdtools/clean/'
+     include '**/*.jar'
+     exclude '**/*-javadoc.jar','**/*-sources.jar'
+ 	}
+
+ 	

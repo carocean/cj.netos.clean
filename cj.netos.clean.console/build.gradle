@@ -1,0 +1,52 @@
+sourceSets { 
+	 main { 
+	 	java{
+	 		srcDir "$projectDir/src"
+	 	}
+	 	resources{
+		 	srcDir "$projectDir/src"
+		 }
+	 } 
+ 	}
+ 		sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+ 	tasks.withType(JavaCompile) {  
+        options.encoding = "UTF-8"  
+    } 
+ repositories { 
+ 	mavenCentral();
+	 flatDir(dirs: "$projectDir/global/lib") 
+ } 
+ 
+dependencies {
+	compile(
+			'commons-cli:commons-cli:1.2'
+	)
+	compile group: 'cj.studio.gateway2', name: 'cj.studio.orm.mongodb', version: ref_cj_studio_orm_mongodb
+	compile group: 'org.mongodb', name: 'mongodb-driver', version: '3.12.1'
+	compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.3.1'
+	// https://mvnrepository.com/artifact/com.belerweb/pinyin4j
+	compile group: 'com.belerweb', name: 'pinyin4j', version: '2.5.1'
+}
+task copyRefembeds(type: Copy) {
+	from configurations.compileClasspath.files {
+		include 'cj.studio.orm.mongodb-*.jar'
+	}
+	into 'src/cj/refembeds'
+}
+task copyReferences(type: Copy) {
+	from configurations.compileClasspath.files {
+		include 'cj.lns.chip.sos.cube-*.jar', 'mongodb-driver-*.jar', 'bson-*.jar', 'cj.studio.openport-*.jar','okhttp-*.jar','pinyin4j-*.jar'
+	}
+	into 'src/cj/references'
+}
+build.dependsOn('copyReferences')
+build.dependsOn('copyRefembeds')
+
+task release(type: Copy) {
+ dependsOn "build"
+ from 'build/libs/'
+ into '../cmdtools/clean/'
+ include '**/*.jar'
+ exclude '**/*-javadoc.jar','**/*-sources.jar'
+}
